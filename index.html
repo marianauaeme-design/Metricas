@@ -407,10 +407,110 @@
     letter-spacing: 0.05em;
   }
 
+  /* RANKING TOP */
+  .ranking-box {
+    background: var(--white);
+    border: var(--border);
+    border-radius: var(--radius);
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .ranking-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--gray-600);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .ranking-title::before {
+    content: '🏆';
+    font-size: 14px;
+  }
+
+  .ranking-empty {
+    font-size: 12px;
+    color: var(--gray-400);
+    font-style: italic;
+    text-align: center;
+    padding: 8px 0;
+  }
+
+  .ranking-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 0;
+    border-bottom: 1px solid var(--gray-200);
+  }
+
+  .ranking-row:last-child { border-bottom: none; }
+
+  .rank-pos {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .rank-1 { background: #FFF8E1; color: #F57F17; }
+  .rank-2 { background: #F5F5F5; color: #616161; }
+  .rank-3 { background: #FBE9E7; color: #BF360C; }
+  .rank-n { background: var(--gray-100); color: var(--gray-600); }
+
+  .rank-name {
+    flex: 1;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--black);
+  }
+
+  .rank-detail {
+    font-size: 11px;
+    color: var(--gray-600);
+    white-space: nowrap;
+  }
+
+  .rank-time {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--red);
+    white-space: nowrap;
+    min-width: 60px;
+    text-align: right;
+  }
+
+  .rank-bar-wrap {
+    width: 80px;
+    height: 6px;
+    background: var(--gray-200);
+    border-radius: 3px;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .rank-bar {
+    height: 100%;
+    background: var(--red);
+    border-radius: 3px;
+    transition: width 0.4s ease;
+  }
+
   @media (max-width: 600px) {
     th, td { font-size: 12px; }
     .btn { font-size: 12px; padding: 7px 10px; }
     .header-title { font-size: 13px; }
+    .rank-bar-wrap { display: none; }
   }
 </style>
 </head>
@@ -469,6 +569,10 @@
       </table>
       <button class="add-row-btn" onclick="addRow(0)">+ Agregar fila</button>
     </div>
+    <div class="ranking-box">
+      <div class="ranking-title">Ranking por MG – Menor tiempo promedio por tarea</div>
+      <div id="ranking0"><div class="ranking-empty">Ingresa horas de inicio y fin para ver el ranking</div></div>
+    </div>
     <div class="obs-box">
       <label>Observaciones</label>
       <textarea id="obs0" placeholder="Anota cualquier observación del turno..."></textarea>
@@ -494,6 +598,10 @@
         <tbody id="body1"></tbody>
       </table>
       <button class="add-row-btn" onclick="addRow(1)">+ Agregar fila</button>
+    </div>
+    <div class="ranking-box">
+      <div class="ranking-title">Ranking Montacarguistas – Menor tiempo promedio por maniobra</div>
+      <div id="ranking1"><div class="ranking-empty">Ingresa horas de inicio y fin para ver el ranking</div></div>
     </div>
     <div class="obs-box">
       <label>Observaciones</label>
@@ -633,13 +741,13 @@ function addRow(tab) {
   if (tab === 0) {
     const cols = ['Área','Tarea','MG 1','MG 2'];
     cols.forEach(p => { const td = document.createElement('td'); td.appendChild(makeInput('text', p)); tr.appendChild(td); });
-    [0,0].forEach(() => { const td = document.createElement('td'); td.appendChild(timeInput()); tr.appendChild(td); });
+    [0,0].forEach(() => { const td = document.createElement('td'); const ti = timeInput(); ti.addEventListener('change', updateRankings); td.appendChild(ti); tr.appendChild(td); });
     const tdM = document.createElement('td'); tdM.appendChild(makeInput('text','Meta')); tr.appendChild(tdM);
   }
 
   if (tab === 1) {
     const td0 = document.createElement('td'); td0.appendChild(makeInput('text','Ruta')); tr.appendChild(td0);
-    const td1 = document.createElement('td'); td1.appendChild(makeInput('text','Nombre')); tr.appendChild(td1);
+    const td1 = document.createElement('td'); const nm1 = makeInput('text','Nombre'); nm1.addEventListener('change', updateRankings); td1.appendChild(nm1); tr.appendChild(td1);
     const td2 = document.createElement('td');
     const sel = makeSelect(['Carga','Descarga','Acomodo']);
     td2.appendChild(sel); tr.appendChild(td2);
@@ -684,6 +792,80 @@ function calcTime(tr) {
     const ro = tr.querySelector('input[readonly]');
     if (ro && diff >= 0) ro.value = diff + ' min';
   }
+  updateRankings();
+}
+
+function getTimeDiff(t1, t2) {
+  if (!t1 || !t2) return null;
+  const [h1, m1] = t1.split(':').map(Number);
+  const [h2, m2] = t2.split(':').map(Number);
+  const d = (h2 * 60 + m2) - (h1 * 60 + m1);
+  return d > 0 ? d : null;
+}
+
+function renderRanking(containerId, entries) {
+  const box = document.getElementById(containerId);
+  if (!entries.length) {
+    box.innerHTML = '<div class="ranking-empty">Ingresa horas de inicio y fin para ver el ranking</div>';
+    return;
+  }
+  const maxT = entries[0].avg;
+  const medals = ['🥇','🥈','🥉'];
+  box.innerHTML = entries.map((e, i) => {
+    const posClass = i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : 'rank-n';
+    const medal = medals[i] || (i + 1);
+    const barPct = Math.round((e.avg / maxT) * 100);
+    return `<div class="ranking-row">
+      <div class="rank-pos ${posClass}">${medal}</div>
+      <div class="rank-name">${e.name || '—'}</div>
+      <div class="rank-detail">${e.count} maniobra${e.count !== 1 ? 's' : ''}</div>
+      <div class="rank-bar-wrap"><div class="rank-bar" style="width:${barPct}%"></div></div>
+      <div class="rank-time">${e.avg} min</div>
+    </div>`;
+  }).join('');
+}
+
+function updateRankings() {
+  // RANKING 0: MG – por nombre MG (MG1 o MG2), menor promedio de tiempo
+  const map0 = {};
+  document.getElementById('body0').querySelectorAll('tr').forEach(tr => {
+    const inputs = tr.querySelectorAll('input');
+    if (inputs.length < 6) return;
+    const mg1 = inputs[2].value.trim();
+    const mg2 = inputs[3].value.trim();
+    const t1 = inputs[4].value;
+    const t2 = inputs[5].value;
+    const diff = getTimeDiff(t1, t2);
+    if (diff === null) return;
+    [mg1, mg2].forEach(mg => {
+      if (!mg) return;
+      if (!map0[mg]) map0[mg] = { total: 0, count: 0 };
+      map0[mg].total += diff;
+      map0[mg].count++;
+    });
+  });
+  const entries0 = Object.entries(map0)
+    .map(([name, d]) => ({ name, avg: Math.round(d.total / d.count), count: d.count }))
+    .sort((a, b) => a.avg - b.avg);
+  renderRanking('ranking0', entries0);
+
+  // RANKING 1: Montacarguistas – menor promedio de tiempo por maniobra
+  const map1 = {};
+  document.getElementById('body1').querySelectorAll('tr').forEach(tr => {
+    const inputs = tr.querySelectorAll('input');
+    const nombre = inputs[1] ? inputs[1].value.trim() : '';
+    const t1 = inputs[2] ? inputs[2].value : '';
+    const t2 = inputs[3] ? inputs[3].value : '';
+    const diff = getTimeDiff(t1, t2);
+    if (!nombre || diff === null) return;
+    if (!map1[nombre]) map1[nombre] = { total: 0, count: 0 };
+    map1[nombre].total += diff;
+    map1[nombre].count++;
+  });
+  const entries1 = Object.entries(map1)
+    .map(([name, d]) => ({ name, avg: Math.round(d.total / d.count), count: d.count }))
+    .sort((a, b) => a.avg - b.avg);
+  renderRanking('ranking1', entries1);
 }
 
 function updateCounts() {
@@ -857,6 +1039,7 @@ try {
 } catch(e) {}
 
 updateCounts();
+updateRankings();
 </script>
 </body>
 </html>
