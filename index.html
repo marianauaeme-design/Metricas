@@ -264,8 +264,8 @@ tr:nth-child(even) { background: var(--gray-100); }
       </div>
       <div class="form-group">
         <label>Puesto *</label>
-        <select id="r-puesto">
-          <option value="">— Seleccionar —</option>
+        <input type="text" id="r-puesto" placeholder="Ej. Auxiliar, Chofer, Montacarguista..." list="puestos-lista">
+        <datalist id="puestos-lista">
           <option>Auxiliar</option>
           <option>Montacarguista</option>
           <option>Chofer</option>
@@ -273,8 +273,7 @@ tr:nth-child(even) { background: var(--gray-100); }
           <option>Personal de Limpieza</option>
           <option>Supervisor</option>
           <option>Coordinador</option>
-          <option>Otro</option>
-        </select>
+        </datalist>
       </div>
       <div class="form-group">
         <label>Fecha</label>
@@ -325,13 +324,7 @@ tr:nth-child(even) { background: var(--gray-100); }
         </div>
         <div class="form-group full">
           <label>Puesto *</label>
-          <select id="ar-puesto">
-            <option value="">— Seleccionar —</option>
-            <option>Auxiliar</option><option>Montacarguista</option>
-            <option>Chofer</option><option>Validador</option>
-            <option>Personal de Limpieza</option><option>Supervisor</option>
-            <option>Coordinador</option><option>Otro</option>
-          </select>
+          <input type="text" id="ar-puesto" placeholder="Ej. Auxiliar, Chofer..." list="puestos-lista">
         </div>
         <div class="form-group full">
           <label>¿Qué estás registrando?</label>
