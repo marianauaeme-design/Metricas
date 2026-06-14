@@ -3,526 +3,231 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Métricas Operativas – CEDIS Coecillo</title>
+<title>Control de Tiempos Operativos – CEDIS Coecillo</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.6.0/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
-  :root {
-    --red: #E3001B;
-    --red-dark: #A80014;
-    --black: #1A1A1A;
-    --gray-100: #F5F5F3;
-    --gray-200: #E8E8E5;
-    --gray-400: #9A9A95;
-    --gray-600: #5C5C58;
-    --white: #FFFFFF;
-    --success: #2E7D32;
-    --border: 1px solid var(--gray-200);
-    --radius: 8px;
-    --font: 'Segoe UI', system-ui, sans-serif;
-  }
+:root {
+  --red: #E3001B;
+  --black: #1A1A1A;
+  --gray-100: #F5F5F3;
+  --gray-200: #E8E8E5;
+  --gray-400: #9A9A95;
+  --gray-600: #5C5C58;
+  --white: #FFFFFF;
+  --border: 1px solid var(--gray-200);
+  --radius: 8px;
+  --font: 'Segoe UI', system-ui, sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font); background: var(--gray-100); color: var(--black); min-height: 100vh; }
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+/* HEADER */
+.header {
+  background: var(--black); padding: 0 1rem;
+  display: flex; align-items: center; gap: 1rem;
+  height: 56px; position: sticky; top: 0; z-index: 100;
+}
+.header-logo {
+  background: var(--red); color: white; font-size: 10px;
+  font-weight: 700; padding: 4px 8px; border-radius: 4px;
+  line-height: 1.3; text-align: center;
+}
+.header-title { color: white; font-size: 14px; font-weight: 600; flex: 1; }
+.header-date { color: var(--gray-400); font-size: 12px; white-space: nowrap; }
 
-  body {
-    font-family: var(--font);
-    background: var(--gray-100);
-    color: var(--black);
-    min-height: 100vh;
-  }
+/* TABS */
+.tabs-wrap {
+  background: var(--white); border-bottom: var(--border);
+  padding: 0 1rem; overflow-x: auto; display: flex; gap: 2px;
+}
+.tab {
+  padding: 12px 16px; font-size: 13px; font-weight: 500;
+  color: var(--gray-600); cursor: pointer;
+  border-bottom: 2px solid transparent;
+  background: none; border-top: none; border-left: none; border-right: none;
+  font-family: var(--font); white-space: nowrap;
+}
+.tab.active { color: var(--red); border-bottom-color: var(--red); }
 
-  /* HEADER */
-  .header {
-    background: var(--black);
-    padding: 0 1rem;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    height: 56px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
+/* CONTENT */
+.content { padding: 1rem; max-width: 960px; margin: 0 auto; }
+.section { display: none; }
+.section.active { display: block; }
 
-  .header-logo {
-    background: var(--red);
-    color: white;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    padding: 4px 8px;
-    border-radius: 4px;
-    line-height: 1.3;
-    text-align: center;
-  }
+/* CARDS */
+.card {
+  background: var(--white); border: var(--border);
+  border-radius: var(--radius); padding: 1.25rem;
+  margin-bottom: 1rem;
+}
+.card-title {
+  font-size: 13px; font-weight: 700; color: var(--gray-600);
+  text-transform: uppercase; letter-spacing: 0.06em;
+  margin-bottom: 1rem; padding-bottom: 8px;
+  border-bottom: 2px solid var(--red);
+  display: flex; align-items: center; gap: 8px;
+}
 
-  .header-title {
-    color: white;
-    font-size: 14px;
-    font-weight: 600;
-    letter-spacing: 0.02em;
-    flex: 1;
-  }
+/* FORM GRID */
+.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+.form-group { display: flex; flex-direction: column; gap: 5px; }
+.form-group label { font-size: 11px; font-weight: 600; color: var(--gray-600); text-transform: uppercase; letter-spacing: 0.05em; }
+.form-group input, .form-group select, .form-group textarea {
+  border: var(--border); border-radius: 6px;
+  padding: 9px 10px; font-size: 13px; font-family: var(--font);
+  color: var(--black); background: var(--white);
+}
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+  outline: 2px solid var(--red); border-color: var(--red);
+}
+.form-group.full { grid-column: 1 / -1; }
 
-  .header-date {
-    color: var(--gray-400);
-    font-size: 12px;
-    white-space: nowrap;
-  }
+/* BUTTONS */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 9px 16px; border-radius: var(--radius);
+  font-size: 13px; font-weight: 600; cursor: pointer;
+  border: none; font-family: var(--font);
+  transition: opacity 0.15s, transform 0.1s;
+}
+.btn:active { transform: scale(0.97); }
+.btn-primary { background: var(--red); color: white; }
+.btn-black { background: var(--black); color: white; }
+.btn-secondary { background: var(--gray-200); color: var(--black); }
+.btn-danger { background: #fdecea; color: #c0392b; }
+.btn-small { padding: 4px 10px; font-size: 12px; border-radius: 6px; }
+.btn-group { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 1rem; }
 
-  /* DATE BAR */
-  .date-bar {
-    background: var(--white);
-    border-bottom: var(--border);
-    padding: 10px 1rem;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex-wrap: wrap;
-  }
+/* TABLE */
+.table-wrap { overflow-x: auto; border-radius: var(--radius); border: var(--border); }
+table { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 800px; }
+th {
+  background: var(--black); color: white; font-size: 10px;
+  font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;
+  padding: 9px 8px; text-align: left; white-space: nowrap;
+}
+td { padding: 8px; border-bottom: 1px solid var(--gray-200); vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
+tr:nth-child(even) { background: var(--gray-100); }
 
-  .date-bar label {
-    font-size: 12px;
-    color: var(--gray-600);
-    font-weight: 500;
-    white-space: nowrap;
-  }
+/* BADGES */
+.badge {
+  display: inline-block; padding: 2px 8px; border-radius: 20px;
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+}
+.badge-ok { background: #e8f5e9; color: #2e7d32; }
+.badge-warn { background: #fff8e1; color: #f57f17; }
+.badge-bad { background: #fdecea; color: #c0392b; }
+.badge-gray { background: var(--gray-200); color: var(--gray-600); }
 
-  .date-bar input, .date-bar select {
-    border: var(--border);
-    border-radius: var(--radius);
-    padding: 6px 10px;
-    font-size: 13px;
-    font-family: var(--font);
-    background: var(--white);
-    color: var(--black);
-  }
+/* STATS */
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 1rem; }
+.stat-card {
+  background: var(--white); border: var(--border);
+  border-radius: var(--radius); padding: 14px; text-align: center;
+}
+.stat-card .num { font-size: 28px; font-weight: 700; color: var(--red); line-height: 1; }
+.stat-card .lbl { font-size: 10px; color: var(--gray-600); margin-top: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
 
-  .auxiliar-input {
-    flex: 1;
-    min-width: 160px;
-    border: var(--border);
-    border-radius: var(--radius);
-    padding: 6px 10px;
-    font-size: 13px;
-    font-family: var(--font);
-  }
+/* RECOMENDACIONES */
+.rec-item {
+  display: flex; gap: 10px; padding: 10px 0;
+  border-bottom: 1px solid var(--gray-200);
+}
+.rec-item:last-child { border-bottom: none; }
+.rec-icon { font-size: 20px; flex-shrink: 0; }
+.rec-text { font-size: 13px; line-height: 1.5; }
+.rec-text strong { display: block; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--red); margin-bottom: 2px; }
 
-  /* TABS */
-  .tabs-wrap {
-    background: var(--white);
-    border-bottom: var(--border);
-    padding: 0 1rem;
-    overflow-x: auto;
-    display: flex;
-    gap: 2px;
-    white-space: nowrap;
-  }
+/* QR */
+.qr-wrap {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 12px; padding: 1.5rem;
+}
+#qrcode canvas, #qrcode img { border: 8px solid white; border-radius: 4px; box-shadow: 0 2px 12px rgba(0,0,0,0.12); }
+.qr-url { font-size: 11px; color: var(--gray-600); word-break: break-all; text-align: center; max-width: 280px; }
 
-  .tab {
-    padding: 12px 14px;
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--gray-600);
-    cursor: pointer;
-    border-bottom: 2px solid transparent;
-    background: none;
-    border-top: none;
-    border-left: none;
-    border-right: none;
-    font-family: var(--font);
-    transition: color 0.15s, border-color 0.15s;
-    white-space: nowrap;
-  }
+/* TURNO BAR */
+.turno-bar {
+  background: var(--white); border-bottom: var(--border);
+  padding: 10px 1rem; display: flex; align-items: center;
+  gap: 12px; flex-wrap: wrap;
+}
+.turno-bar label { font-size: 12px; color: var(--gray-600); font-weight: 500; }
+.turno-bar input, .turno-bar select {
+  border: var(--border); border-radius: 6px;
+  padding: 6px 10px; font-size: 13px; font-family: var(--font);
+}
+.turno-bar input[type="text"] { flex: 1; min-width: 160px; }
 
-  .tab.active {
-    color: var(--red);
-    border-bottom-color: var(--red);
-  }
+/* TOAST */
+#toast {
+  position: fixed; bottom: 80px; left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--black); color: white;
+  padding: 10px 20px; border-radius: 20px;
+  font-size: 13px; font-weight: 500;
+  opacity: 0; transition: all 0.3s;
+  pointer-events: none; z-index: 999;
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-  /* CONTENT */
-  .content {
-    padding: 1rem;
-    max-width: 900px;
-    margin: 0 auto;
-  }
+/* FOOTER */
+.footer-actions {
+  position: sticky; bottom: 0;
+  background: var(--white); border-top: var(--border);
+  padding: 12px 1rem; display: flex;
+  gap: 10px; justify-content: flex-end; flex-wrap: wrap;
+}
 
-  .section { display: none; }
-  .section.active { display: block; }
+/* SELF-REG FORM */
+.self-reg-card {
+  background: var(--white); border: 2px solid var(--red);
+  border-radius: 12px; padding: 1.5rem; max-width: 480px; margin: 0 auto;
+}
+.self-reg-title {
+  font-size: 16px; font-weight: 700; text-align: center;
+  margin-bottom: 1.2rem; color: var(--black);
+}
+.self-reg-logo {
+  background: var(--red); color: white; font-size: 11px; font-weight: 700;
+  padding: 4px 10px; border-radius: 4px; display: inline-block;
+  margin-bottom: 6px;
+}
+.time-row { display: flex; gap: 10px; }
+.time-row .form-group { flex: 1; }
+.action-type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.action-btn {
+  padding: 12px; border: 2px solid var(--gray-200); border-radius: 8px;
+  background: var(--white); cursor: pointer; font-family: var(--font);
+  font-size: 13px; font-weight: 600; transition: all 0.15s;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+}
+.action-btn.selected { border-color: var(--red); background: #fff0f0; color: var(--red); }
+.action-btn .icon { font-size: 20px; }
 
-  .section-title {
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--black);
-    margin-bottom: 1rem;
-    padding-bottom: 8px;
-    border-bottom: 2px solid var(--red);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
+/* EMPTY STATE */
+.empty-state { text-align: center; padding: 3rem 1rem; color: var(--gray-400); font-size: 14px; }
+.empty-state .icon { font-size: 40px; margin-bottom: 8px; }
 
-  .section-title span {
-    background: var(--red);
-    color: white;
-    font-size: 11px;
-    padding: 2px 8px;
-    border-radius: 20px;
-    font-weight: 600;
-  }
-
-  /* TABLE */
-  .table-wrap {
-    background: var(--white);
-    border-radius: var(--radius);
-    border: var(--border);
-    overflow: hidden;
-    margin-bottom: 1rem;
-  }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 13px;
-  }
-
-  th {
-    background: var(--black);
-    color: white;
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    padding: 10px 8px;
-    text-align: left;
-    white-space: nowrap;
-  }
-
-  td {
-    padding: 4px 4px;
-    border-bottom: 1px solid var(--gray-200);
-    vertical-align: middle;
-  }
-
-  tr:last-child td { border-bottom: none; }
-  tr:nth-child(even) { background: var(--gray-100); }
-
-  td input, td select {
-    width: 100%;
-    border: none;
-    background: transparent;
-    font-size: 13px;
-    font-family: var(--font);
-    padding: 5px 6px;
-    color: var(--black);
-    border-radius: 4px;
-  }
-
-  td input:focus, td select:focus {
-    outline: 2px solid var(--red);
-    background: white;
-  }
-
-  td select {
-    cursor: pointer;
-  }
-
-  /* ROW ACTIONS */
-  .row-actions {
-    display: flex;
-    gap: 4px;
-    justify-content: flex-end;
-    padding: 8px 1rem;
-  }
-
-  /* BUTTONS */
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 14px;
-    border-radius: var(--radius);
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    border: none;
-    font-family: var(--font);
-    transition: opacity 0.15s, transform 0.1s;
-  }
-
-  .btn:active { transform: scale(0.97); }
-
-  .btn-primary {
-    background: var(--red);
-    color: white;
-  }
-
-  .btn-secondary {
-    background: var(--gray-200);
-    color: var(--black);
-  }
-
-  .btn-black {
-    background: var(--black);
-    color: white;
-  }
-
-  .btn-small {
-    padding: 4px 10px;
-    font-size: 12px;
-    border-radius: 6px;
-  }
-
-  .btn-danger {
-    background: #fdecea;
-    color: #c0392b;
-  }
-
-  .add-row-btn {
-    width: 100%;
-    padding: 10px;
-    background: var(--gray-100);
-    border: 1.5px dashed var(--gray-400);
-    color: var(--gray-600);
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    font-family: var(--font);
-    border-radius: 0 0 var(--radius) var(--radius);
-    transition: background 0.15s;
-  }
-
-  .add-row-btn:hover { background: var(--gray-200); }
-
-  /* FOOTER ACTIONS */
-  .footer-actions {
-    position: sticky;
-    bottom: 0;
-    background: var(--white);
-    border-top: var(--border);
-    padding: 12px 1rem;
-    display: flex;
-    gap: 10px;
-    justify-content: flex-end;
-    flex-wrap: wrap;
-  }
-
-  /* OBSERVACIONES */
-  .obs-box {
-    background: var(--white);
-    border: var(--border);
-    border-radius: var(--radius);
-    padding: 1rem;
-    margin-bottom: 1rem;
-  }
-
-  .obs-box label {
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--gray-600);
-    display: block;
-    margin-bottom: 8px;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-
-  .obs-box textarea {
-    width: 100%;
-    border: var(--border);
-    border-radius: 6px;
-    padding: 8px;
-    font-size: 13px;
-    font-family: var(--font);
-    resize: vertical;
-    min-height: 80px;
-    color: var(--black);
-  }
-
-  /* STATUS BADGE */
-  .badge {
-    display: inline-block;
-    padding: 2px 8px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 600;
-  }
-
-  .badge-success { background: #e8f5e9; color: #2e7d32; }
-  .badge-warning { background: #fff8e1; color: #f57f17; }
-  .badge-danger { background: #fdecea; color: #c0392b; }
-
-  /* TOAST */
-  #toast {
-    position: fixed;
-    bottom: 80px;
-    left: 50%;
-    transform: translateX(-50%) translateY(20px);
-    background: var(--black);
-    color: white;
-    padding: 10px 20px;
-    border-radius: 20px;
-    font-size: 13px;
-    font-weight: 500;
-    opacity: 0;
-    transition: all 0.3s;
-    pointer-events: none;
-    z-index: 999;
-    white-space: nowrap;
-  }
-
-  #toast.show {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
-
-  /* Summary card */
-  .summary-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 10px;
-    margin-bottom: 1rem;
-  }
-
-  .summary-card {
-    background: var(--white);
-    border: var(--border);
-    border-radius: var(--radius);
-    padding: 12px;
-    text-align: center;
-  }
-
-  .summary-card .num {
-    font-size: 28px;
-    font-weight: 700;
-    color: var(--red);
-    line-height: 1;
-  }
-
-  .summary-card .lbl {
-    font-size: 11px;
-    color: var(--gray-600);
-    margin-top: 4px;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-
-  /* RANKING TOP */
-  .ranking-box {
-    background: var(--white);
-    border: var(--border);
-    border-radius: var(--radius);
-    padding: 1rem;
-    margin-bottom: 1rem;
-  }
-
-  .ranking-title {
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--gray-600);
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    margin-bottom: 10px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .ranking-title::before {
-    content: '🏆';
-    font-size: 14px;
-  }
-
-  .ranking-empty {
-    font-size: 12px;
-    color: var(--gray-400);
-    font-style: italic;
-    text-align: center;
-    padding: 8px 0;
-  }
-
-  .ranking-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 7px 0;
-    border-bottom: 1px solid var(--gray-200);
-  }
-
-  .ranking-row:last-child { border-bottom: none; }
-
-  .rank-pos {
-    width: 26px;
-    height: 26px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    font-weight: 700;
-    flex-shrink: 0;
-  }
-
-  .rank-1 { background: #FFF8E1; color: #F57F17; }
-  .rank-2 { background: #F5F5F5; color: #616161; }
-  .rank-3 { background: #FBE9E7; color: #BF360C; }
-  .rank-n { background: var(--gray-100); color: var(--gray-600); }
-
-  .rank-name {
-    flex: 1;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--black);
-  }
-
-  .rank-detail {
-    font-size: 11px;
-    color: var(--gray-600);
-    white-space: nowrap;
-  }
-
-  .rank-time {
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--red);
-    white-space: nowrap;
-    min-width: 60px;
-    text-align: right;
-  }
-
-  .rank-bar-wrap {
-    width: 80px;
-    height: 6px;
-    background: var(--gray-200);
-    border-radius: 3px;
-    overflow: hidden;
-    flex-shrink: 0;
-  }
-
-  .rank-bar {
-    height: 100%;
-    background: var(--red);
-    border-radius: 3px;
-    transition: width 0.4s ease;
-  }
-
-  @media (max-width: 600px) {
-    th, td { font-size: 12px; }
-    .btn { font-size: 12px; padding: 7px 10px; }
-    .header-title { font-size: 13px; }
-    .rank-bar-wrap { display: none; }
-  }
+@media (max-width: 600px) {
+  .header-title { font-size: 12px; }
+  table { font-size: 11px; }
+  .form-grid { grid-template-columns: 1fr; }
+}
 </style>
 </head>
 <body>
 
 <div class="header">
   <div class="header-logo">COCA-COLA<br>FEMSA</div>
-  <div class="header-title">Métricas Operativas – CEDIS Coecillo</div>
+  <div class="header-title">Control de Tiempos Operativos – CEDIS Coecillo</div>
   <div class="header-date" id="hdr-date"></div>
 </div>
 
-<div class="date-bar">
+<div class="turno-bar">
   <label>Fecha:</label>
   <input type="date" id="fecha-global">
   <label>Turno:</label>
@@ -532,514 +237,782 @@
     <option>Nocturno</option>
   </select>
   <label>Auxiliar:</label>
-  <input class="auxiliar-input" type="text" id="auxiliar-global" placeholder="Nombre del auxiliar">
+  <input type="text" id="auxiliar-global" placeholder="Nombre del auxiliar">
 </div>
 
 <div class="tabs-wrap">
-  <button class="tab active" onclick="showTab(0)">Maniobras Generales</button>
-  <button class="tab" onclick="showTab(1)">Montacargas</button>
-  <button class="tab" onclick="showTab(2)">Personal de Limpieza</button>
-  <button class="tab" onclick="showTab(3)">Distribución de Personal</button>
-  <button class="tab" onclick="showTab(4)">Tiempos Operativos</button>
+  <button class="tab active" onclick="showTab(0)">📋 Registrar Empleado</button>
+  <button class="tab" onclick="showTab(1)">📊 Registros del Turno</button>
+  <button class="tab" onclick="showTab(2)">📈 Reporte y Análisis</button>
+  <button class="tab" onclick="showTab(3)">📱 Código QR</button>
 </div>
 
 <div class="content">
 
-  <!-- RESUMEN -->
-  <div id="resumen-bar" class="summary-grid" style="margin-top:1rem"></div>
-
-  <!-- TAB 0: MANIOBRAS GENERALES -->
-  <div class="section active" id="tab0">
-    <div class="section-title">Métricas para Maniobras Generales <span id="cnt0">0 registros</span></div>
-    <div class="table-wrap">
-      <table id="tbl0">
-        <thead>
-          <tr>
-            <th style="width:14%">Área</th>
-            <th style="width:20%">Tarea</th>
-            <th style="width:10%">MG 1</th>
-            <th style="width:10%">MG 2</th>
-            <th style="width:11%">H. Inicio</th>
-            <th style="width:11%">H. Fin</th>
-            <th style="width:16%">Meta</th>
-            <th style="width:8%"></th>
-          </tr>
-        </thead>
-        <tbody id="body0"></tbody>
-      </table>
-      <button class="add-row-btn" onclick="addRow(0)">+ Agregar fila</button>
+<!-- TAB 0: REGISTRO -->
+<div class="section active" id="tab0">
+  <div class="card" style="max-width:600px; margin:0 auto;">
+    <div class="card-title">📝 Nuevo Registro de Empleado</div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Nombre completo *</label>
+        <input type="text" id="r-nombre" placeholder="Ej. Juan Pérez García">
+      </div>
+      <div class="form-group">
+        <label>Número de empleado</label>
+        <input type="text" id="r-numempleado" placeholder="Ej. 12345">
+      </div>
+      <div class="form-group">
+        <label>Puesto *</label>
+        <select id="r-puesto">
+          <option value="">— Seleccionar —</option>
+          <option>Auxiliar</option>
+          <option>Montacarguista</option>
+          <option>Chofer</option>
+          <option>Validador</option>
+          <option>Personal de Limpieza</option>
+          <option>Supervisor</option>
+          <option>Coordinador</option>
+          <option>Otro</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Fecha</label>
+        <input type="date" id="r-fecha">
+      </div>
+      <div class="form-group">
+        <label>Hora de entrada</label>
+        <input type="time" id="r-entrada">
+      </div>
+      <div class="form-group">
+        <label>Salida a comer</label>
+        <input type="time" id="r-sal-comer">
+      </div>
+      <div class="form-group">
+        <label>Regreso de comer</label>
+        <input type="time" id="r-reg-comer">
+      </div>
+      <div class="form-group">
+        <label>Hora de salida</label>
+        <input type="time" id="r-salida">
+      </div>
+      <div class="form-group full">
+        <label>Observaciones</label>
+        <textarea id="r-obs" rows="2" placeholder="Retardo, incidencia, salida anticipada..."></textarea>
+      </div>
     </div>
-    <div class="ranking-box">
-      <div class="ranking-title">Ranking por MG – Menor tiempo promedio por tarea</div>
-      <div id="ranking0"><div class="ranking-empty">Ingresa horas de inicio y fin para ver el ranking</div></div>
-    </div>
-    <div class="obs-box">
-      <label>Observaciones</label>
-      <textarea id="obs0" placeholder="Anota cualquier observación del turno..."></textarea>
-    </div>
-  </div>
-
-  <!-- TAB 1: MONTACARGAS -->
-  <div class="section" id="tab1">
-    <div class="section-title">Métricas para Montacargas <span id="cnt1">0 registros</span></div>
-    <div class="table-wrap">
-      <table id="tbl1">
-        <thead>
-          <tr>
-            <th style="width:12%">Ruta</th>
-            <th style="width:22%">Montacarguista</th>
-            <th style="width:18%">Tipo de Maniobra</th>
-            <th style="width:12%">H. Inicio</th>
-            <th style="width:12%">H. Fin</th>
-            <th style="width:14%">Tiempo Total</th>
-            <th style="width:10%"></th>
-          </tr>
-        </thead>
-        <tbody id="body1"></tbody>
-      </table>
-      <button class="add-row-btn" onclick="addRow(1)">+ Agregar fila</button>
-    </div>
-    <div class="ranking-box">
-      <div class="ranking-title">Ranking Montacarguistas – Menor tiempo promedio por maniobra</div>
-      <div id="ranking1"><div class="ranking-empty">Ingresa horas de inicio y fin para ver el ranking</div></div>
-    </div>
-    <div class="obs-box">
-      <label>Observaciones</label>
-      <textarea id="obs1" placeholder="Incidencias, retrasos, equipos fuera de servicio..."></textarea>
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="guardarRegistro()">✓ Guardar Registro</button>
+      <button class="btn btn-secondary" onclick="limpiarForm()">✕ Limpiar</button>
     </div>
   </div>
 
-  <!-- TAB 2: LIMPIEZA -->
-  <div class="section" id="tab2">
-    <div class="section-title">Métricas – Personal de Limpieza <span id="cnt2">0 registros</span></div>
-    <div class="table-wrap">
-      <table id="tbl2">
-        <thead>
-          <tr>
-            <th style="width:16%">Área</th>
-            <th style="width:22%">Tarea</th>
-            <th style="width:12%">MG</th>
-            <th style="width:12%">H. Inicio</th>
-            <th style="width:12%">H. Fin</th>
-            <th style="width:16%">Estado</th>
-            <th style="width:10%"></th>
-          </tr>
-        </thead>
-        <tbody id="body2"></tbody>
-      </table>
-      <button class="add-row-btn" onclick="addRow(2)">+ Agregar fila</button>
-    </div>
-    <div class="obs-box">
-      <label>Observaciones</label>
-      <textarea id="obs2" placeholder="Áreas con necesidades especiales, materiales faltantes..."></textarea>
+  <!-- Auto-registro QR -->
+  <div id="autoReg" style="display:none; max-width:480px; margin: 1rem auto;">
+    <div class="self-reg-card">
+      <div style="text-align:center; margin-bottom:1rem;">
+        <div class="self-reg-logo">COCA-COLA FEMSA · CEDIS Coecillo</div>
+        <div class="self-reg-title">Auto-registro de Tiempo</div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Nombre completo *</label>
+          <input type="text" id="ar-nombre" placeholder="Tu nombre completo">
+        </div>
+        <div class="form-group">
+          <label>No. Empleado</label>
+          <input type="text" id="ar-num" placeholder="Número">
+        </div>
+        <div class="form-group full">
+          <label>Puesto *</label>
+          <select id="ar-puesto">
+            <option value="">— Seleccionar —</option>
+            <option>Auxiliar</option><option>Montacarguista</option>
+            <option>Chofer</option><option>Validador</option>
+            <option>Personal de Limpieza</option><option>Supervisor</option>
+            <option>Coordinador</option><option>Otro</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label>¿Qué estás registrando?</label>
+          <div class="action-type-grid">
+            <button class="action-btn" onclick="selectAction('entrada')" id="ab-entrada">
+              <span class="icon">🟢</span>Entrada
+            </button>
+            <button class="action-btn" onclick="selectAction('sal-comer')" id="ab-sal-comer">
+              <span class="icon">🍽️</span>Salida a comer
+            </button>
+            <button class="action-btn" onclick="selectAction('reg-comer')" id="ab-reg-comer">
+              <span class="icon">↩️</span>Regreso de comer
+            </button>
+            <button class="action-btn" onclick="selectAction('salida')" id="ab-salida">
+              <span class="icon">🔴</span>Salida
+            </button>
+          </div>
+        </div>
+        <div class="form-group full">
+          <label>Hora (se toma automáticamente)</label>
+          <input type="time" id="ar-hora" readonly style="background:#f5f5f3; font-size:16px; font-weight:600;">
+        </div>
+        <div class="form-group full">
+          <label>Observación (opcional)</label>
+          <input type="text" id="ar-obs" placeholder="Ej. Retardo justificado">
+        </div>
+      </div>
+      <div class="btn-group" style="justify-content:center;">
+        <button class="btn btn-primary" onclick="autoGuardar()" style="font-size:15px; padding:12px 28px;">
+          ✓ Registrar
+        </button>
+      </div>
     </div>
   </div>
+</div>
 
-  <!-- TAB 3: DISTRIBUCIÓN PERSONAL -->
-  <div class="section" id="tab3">
-    <div class="section-title">Distribución de Personal <span id="cnt3">0 registros</span></div>
+<!-- TAB 1: LISTA DE REGISTROS -->
+<div class="section" id="tab1">
+  <div class="stats-grid" id="stats-bar"></div>
+  <div class="card">
+    <div class="card-title">📋 Registros del Turno <span id="total-reg" style="background:var(--red);color:white;font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600;"></span></div>
     <div class="table-wrap">
-      <table id="tbl3">
+      <table>
         <thead>
           <tr>
-            <th style="width:16%">Área</th>
-            <th style="width:18%">Actividad</th>
-            <th style="width:10%">Cantidad</th>
-            <th style="width:30%">Nombres</th>
-            <th style="width:18%">Objetivo Principal</th>
-            <th style="width:8%"></th>
-          </tr>
-        </thead>
-        <tbody id="body3"></tbody>
-      </table>
-      <button class="add-row-btn" onclick="addRow(3)">+ Agregar fila</button>
-    </div>
-    <div class="obs-box">
-      <label>Observaciones</label>
-      <textarea id="obs3" placeholder="Personal ausente, cambios de última hora..."></textarea>
-    </div>
-  </div>
-
-  <!-- TAB 4: TIEMPOS OPERATIVOS -->
-  <div class="section" id="tab4">
-    <div class="section-title">Control Diario de Tiempos Operativos <span id="cnt4">0 registros</span></div>
-    <div class="table-wrap" style="overflow-x:auto">
-      <table id="tbl4" style="min-width:700px">
-        <thead>
-          <tr>
+            <th>#</th>
             <th>Nombre</th>
-            <th>No. Empleado</th>
+            <th>No. Emp.</th>
             <th>Puesto</th>
-            <th>H. Entrada</th>
-            <th>Calistenia Ini.</th>
-            <th>Calistenia Fin</th>
+            <th>Entrada</th>
             <th>Sal. Comer</th>
             <th>Reg. Comer</th>
-            <th>H. Salida</th>
+            <th>Salida</th>
+            <th>Hrs. Trabajadas</th>
+            <th>T. Comida</th>
+            <th>Estado</th>
+            <th>Obs.</th>
             <th></th>
           </tr>
         </thead>
-        <tbody id="body4"></tbody>
+        <tbody id="tabla-registros"></tbody>
       </table>
-      <button class="add-row-btn" onclick="addRow(4)">+ Agregar fila</button>
     </div>
-    <div class="obs-box">
-      <label>Observaciones</label>
-      <textarea id="obs4" placeholder="Retardos, salidas anticipadas, incidencias..."></textarea>
+    <div id="empty-state" class="empty-state">
+      <div class="icon">📭</div>
+      <div>Sin registros aún. Ve a "Registrar Empleado" para comenzar.</div>
     </div>
   </div>
-
 </div>
 
+<!-- TAB 2: REPORTE -->
+<div class="section" id="tab2">
+  <div id="reporte-content">
+    <div class="empty-state">
+      <div class="icon">📊</div>
+      <div>Agrega registros para ver el análisis y recomendaciones.</div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB 3: QR -->
+<div class="section" id="tab3">
+  <div class="card" style="max-width:400px; margin:0 auto; text-align:center;">
+    <div class="card-title">📱 Código QR para Auto-registro</div>
+    <p style="font-size:13px; color:var(--gray-600); margin-bottom:1rem;">
+      Los empleados escanean este QR con su celular para registrar su entrada, salida a comer y salida del turno directamente.
+    </p>
+    <div class="qr-wrap">
+      <div id="qrcode"></div>
+      <div class="qr-url" id="qr-url-label"></div>
+    </div>
+    <div class="btn-group" style="justify-content:center;">
+      <button class="btn btn-black" onclick="descargarQR()">⬇️ Descargar QR</button>
+      <button class="btn btn-secondary" onclick="copiarURL()">🔗 Copiar URL</button>
+    </div>
+    <div style="margin-top:1rem; padding:12px; background:var(--gray-100); border-radius:8px; font-size:12px; color:var(--gray-600); text-align:left;">
+      <strong>¿Cómo funciona?</strong><br>
+      1. Imprime o muestra este QR en el CEDIS<br>
+      2. El empleado lo escanea con su cámara<br>
+      3. Selecciona qué está registrando (entrada, comida, salida)<br>
+      4. La hora se captura automáticamente<br>
+      5. El registro aparece en el turno activo
+    </div>
+  </div>
+</div>
+
+</div><!-- /content -->
+
 <div class="footer-actions">
-  <button class="btn btn-secondary" onclick="clearAll()">🗑 Limpiar turno</button>
-  <button class="btn btn-black" onclick="saveLocal()">💾 Guardar borrador</button>
-  <button class="btn btn-primary" onclick="generatePDF()">📄 Generar PDF</button>
+  <button class="btn btn-secondary" onclick="limpiarTurno()">🗑 Limpiar turno</button>
+  <button class="btn btn-black" onclick="exportarCSV()">⬇️ CSV</button>
+  <button class="btn btn-primary" onclick="generarPDF()">📄 Generar PDF</button>
 </div>
 
 <div id="toast"></div>
 
 <script>
+// ── ESTADO ──────────────────────────────────────────────
+let registros = [];
+let accionSeleccionada = '';
+
 const TODAY = new Date();
-document.getElementById('fecha-global').value = TODAY.toISOString().split('T')[0];
+document.getElementById('fecha-global').value = hoyISO();
+document.getElementById('r-fecha').value = hoyISO();
 document.getElementById('hdr-date').textContent = TODAY.toLocaleDateString('es-MX', {weekday:'long', day:'numeric', month:'long'});
 
-let activeTab = 0;
+// Cargar del localStorage
+cargarLocal();
+renderTabla();
+renderStats();
 
-function showTab(n) {
-  document.querySelectorAll('.section').forEach((s, i) => s.classList.toggle('active', i === n));
-  document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i === n));
-  activeTab = n;
+// ── UTILS ────────────────────────────────────────────────
+function hoyISO() {
+  return new Date().toISOString().split('T')[0];
 }
 
-function makeInput(type='text', placeholder='', cls='') {
-  const el = document.createElement('input');
-  el.type = type; el.placeholder = placeholder; el.className = cls;
-  return el;
+function horaActual() {
+  return new Date().toTimeString().slice(0,5);
 }
 
-function makeSelect(opts) {
-  const el = document.createElement('select');
-  opts.forEach(o => { const op = document.createElement('option'); op.textContent = o; el.appendChild(op); });
-  return el;
-}
-
-function timeInput() { return makeInput('time'); }
-
-function delBtn(tr) {
-  const btn = document.createElement('button');
-  btn.className = 'btn btn-danger btn-small';
-  btn.textContent = '✕';
-  btn.onclick = () => { tr.remove(); updateCounts(); };
-  return btn;
-}
-
-function addRow(tab) {
-  const body = document.getElementById('body' + tab);
-  const tr = document.createElement('tr');
-
-  if (tab === 0) {
-    const cols = ['Área','Tarea','MG 1','MG 2'];
-    cols.forEach(p => { const td = document.createElement('td'); td.appendChild(makeInput('text', p)); tr.appendChild(td); });
-    [0,0].forEach(() => { const td = document.createElement('td'); const ti = timeInput(); ti.addEventListener('change', updateRankings); td.appendChild(ti); tr.appendChild(td); });
-    const tdM = document.createElement('td'); tdM.appendChild(makeInput('text','Meta')); tr.appendChild(tdM);
-  }
-
-  if (tab === 1) {
-    const td0 = document.createElement('td'); td0.appendChild(makeInput('text','Ruta')); tr.appendChild(td0);
-    const td1 = document.createElement('td'); const nm1 = makeInput('text','Nombre'); nm1.addEventListener('change', updateRankings); td1.appendChild(nm1); tr.appendChild(td1);
-    const td2 = document.createElement('td');
-    const sel = makeSelect(['Carga','Descarga','Acomodo']);
-    td2.appendChild(sel); tr.appendChild(td2);
-    [0,0].forEach(() => { const td = document.createElement('td'); td.appendChild(timeInput()); tr.appendChild(td); });
-    const tdT = document.createElement('td'); tdT.appendChild(makeInput('text','Auto')); tdT.querySelector('input').readOnly = true; tr.appendChild(tdT);
-    tr.querySelectorAll('input[type="time"]').forEach(inp => inp.addEventListener('change', () => calcTime(tr)));
-  }
-
-  if (tab === 2) {
-    ['Área','Tarea','MG'].forEach(p => { const td = document.createElement('td'); td.appendChild(makeInput('text', p)); tr.appendChild(td); });
-    [0,0].forEach(() => { const td = document.createElement('td'); td.appendChild(timeInput()); tr.appendChild(td); });
-    const tdE = document.createElement('td');
-    tdE.appendChild(makeSelect(['','Excelente','Regular','Mal']));
-    tr.appendChild(tdE);
-  }
-
-  if (tab === 3) {
-    ['Área','Actividad'].forEach(p => { const td = document.createElement('td'); td.appendChild(makeInput('text', p)); tr.appendChild(td); });
-    const tdN = document.createElement('td'); tdN.appendChild(makeInput('number','0')); tr.appendChild(tdN);
-    const tdNm = document.createElement('td'); tdNm.appendChild(makeInput('text','Nombres')); tr.appendChild(tdNm);
-    const tdO = document.createElement('td'); tdO.appendChild(makeInput('text','Objetivo')); tr.appendChild(tdO);
-  }
-
-  if (tab === 4) {
-    ['Nombre','No. Empleado','Puesto'].forEach(p => { const td = document.createElement('td'); td.appendChild(makeInput('text', p)); tr.appendChild(td); });
-    for (let i = 0; i < 6; i++) { const td = document.createElement('td'); td.appendChild(timeInput()); tr.appendChild(td); }
-  }
-
-  const tdA = document.createElement('td');
-  tdA.appendChild(delBtn(tr));
-  tr.appendChild(tdA);
-  body.appendChild(tr);
-  updateCounts();
-}
-
-function calcTime(tr) {
-  const inputs = tr.querySelectorAll('input[type="time"]');
-  if (inputs.length >= 2 && inputs[0].value && inputs[1].value) {
-    const [h1, m1] = inputs[0].value.split(':').map(Number);
-    const [h2, m2] = inputs[1].value.split(':').map(Number);
-    const diff = (h2 * 60 + m2) - (h1 * 60 + m1);
-    const ro = tr.querySelector('input[readonly]');
-    if (ro && diff >= 0) ro.value = diff + ' min';
-  }
-  updateRankings();
-}
-
-function getTimeDiff(t1, t2) {
+function minsDiff(t1, t2) {
   if (!t1 || !t2) return null;
-  const [h1, m1] = t1.split(':').map(Number);
-  const [h2, m2] = t2.split(':').map(Number);
-  const d = (h2 * 60 + m2) - (h1 * 60 + m1);
+  const [h1,m1] = t1.split(':').map(Number);
+  const [h2,m2] = t2.split(':').map(Number);
+  const d = (h2*60+m2) - (h1*60+m1);
   return d > 0 ? d : null;
 }
 
-function renderRanking(containerId, entries) {
-  const box = document.getElementById(containerId);
-  if (!entries.length) {
-    box.innerHTML = '<div class="ranking-empty">Ingresa horas de inicio y fin para ver el ranking</div>';
-    return;
-  }
-  const maxT = entries[0].avg;
-  const medals = ['🥇','🥈','🥉'];
-  box.innerHTML = entries.map((e, i) => {
-    const posClass = i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : 'rank-n';
-    const medal = medals[i] || (i + 1);
-    const barPct = Math.round((e.avg / maxT) * 100);
-    return `<div class="ranking-row">
-      <div class="rank-pos ${posClass}">${medal}</div>
-      <div class="rank-name">${e.name || '—'}</div>
-      <div class="rank-detail">${e.count} maniobra${e.count !== 1 ? 's' : ''}</div>
-      <div class="rank-bar-wrap"><div class="rank-bar" style="width:${barPct}%"></div></div>
-      <div class="rank-time">${e.avg} min</div>
-    </div>`;
-  }).join('');
-}
-
-function updateRankings() {
-  // RANKING 0: MG – por nombre MG (MG1 o MG2), menor promedio de tiempo
-  const map0 = {};
-  document.getElementById('body0').querySelectorAll('tr').forEach(tr => {
-    const inputs = tr.querySelectorAll('input');
-    if (inputs.length < 6) return;
-    const mg1 = inputs[2].value.trim();
-    const mg2 = inputs[3].value.trim();
-    const t1 = inputs[4].value;
-    const t2 = inputs[5].value;
-    const diff = getTimeDiff(t1, t2);
-    if (diff === null) return;
-    [mg1, mg2].forEach(mg => {
-      if (!mg) return;
-      if (!map0[mg]) map0[mg] = { total: 0, count: 0 };
-      map0[mg].total += diff;
-      map0[mg].count++;
-    });
-  });
-  const entries0 = Object.entries(map0)
-    .map(([name, d]) => ({ name, avg: Math.round(d.total / d.count), count: d.count }))
-    .sort((a, b) => a.avg - b.avg);
-  renderRanking('ranking0', entries0);
-
-  // RANKING 1: Montacarguistas – menor promedio de tiempo por maniobra
-  const map1 = {};
-  document.getElementById('body1').querySelectorAll('tr').forEach(tr => {
-    const inputs = tr.querySelectorAll('input');
-    const nombre = inputs[1] ? inputs[1].value.trim() : '';
-    const t1 = inputs[2] ? inputs[2].value : '';
-    const t2 = inputs[3] ? inputs[3].value : '';
-    const diff = getTimeDiff(t1, t2);
-    if (!nombre || diff === null) return;
-    if (!map1[nombre]) map1[nombre] = { total: 0, count: 0 };
-    map1[nombre].total += diff;
-    map1[nombre].count++;
-  });
-  const entries1 = Object.entries(map1)
-    .map(([name, d]) => ({ name, avg: Math.round(d.total / d.count), count: d.count }))
-    .sort((a, b) => a.avg - b.avg);
-  renderRanking('ranking1', entries1);
-}
-
-function updateCounts() {
-  for (let i = 0; i < 5; i++) {
-    const n = document.getElementById('body' + i).rows.length;
-    document.getElementById('cnt' + i).textContent = n + ' registro' + (n !== 1 ? 's' : '');
-  }
-  updateSummary();
-}
-
-function updateSummary() {
-  const totals = [];
-  for (let i = 0; i < 5; i++) totals.push(document.getElementById('body' + i).rows.length);
-  const labels = ['M. Generales','Montacargas','Limpieza','Personal','Tiempos Op.'];
-  const bar = document.getElementById('resumen-bar');
-  bar.innerHTML = totals.map((n, i) => `<div class="summary-card"><div class="num">${n}</div><div class="lbl">${labels[i]}</div></div>`).join('');
-}
-
-function getTableData(tab) {
-  const headers = [
-    ['Área','Tarea','MG 1','MG 2','H. Inicio','H. Fin','Meta'],
-    ['Ruta','Montacarguista','Tipo Maniobra','H. Inicio','H. Fin','Tiempo Total'],
-    ['Área','Tarea','MG','H. Inicio','H. Fin','Estado'],
-    ['Área','Actividad','Cantidad','Nombres','Objetivo Principal'],
-    ['Nombre','No. Empleado','Puesto','H. Entrada','Calistenia Ini.','Calistenia Fin','Sal. Comer','Reg. Comer','H. Salida']
-  ];
-  const rows = [];
-  document.getElementById('body' + tab).querySelectorAll('tr').forEach(tr => {
-    const row = [];
-    tr.querySelectorAll('td:not(:last-child)').forEach(td => {
-      const inp = td.querySelector('input, select');
-      row.push(inp ? inp.value : td.textContent);
-    });
-    rows.push(row);
-  });
-  return { headers: headers[tab], rows };
+function fmtMins(mins) {
+  if (mins === null || mins === undefined) return '—';
+  const h = Math.floor(mins/60);
+  const m = mins % 60;
+  return h > 0 ? `${h}h ${m}m` : `${m}m`;
 }
 
 function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2500);
+  setTimeout(() => t.classList.remove('show'), 2800);
 }
 
-function saveLocal() {
-  const data = {};
-  for (let i = 0; i < 5; i++) data['tab' + i] = getTableData(i);
-  data.fecha = document.getElementById('fecha-global').value;
-  data.turno = document.getElementById('turno-global').value;
-  data.auxiliar = document.getElementById('auxiliar-global').value;
-  for (let i = 0; i < 5; i++) data['obs' + i] = document.getElementById('obs' + i).value;
-  localStorage.setItem('metricas_cedis', JSON.stringify(data));
-  showToast('✓ Borrador guardado localmente');
+function showTab(n) {
+  document.querySelectorAll('.section').forEach((s,i) => s.classList.toggle('active', i===n));
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', i===n));
+  if (n === 2) renderReporte();
+  if (n === 3) generarQR();
 }
 
-function clearAll() {
-  if (!confirm('¿Limpiar todos los registros del turno?')) return;
-  for (let i = 0; i < 5; i++) { document.getElementById('body' + i).innerHTML = ''; document.getElementById('obs' + i).value = ''; }
-  updateCounts();
+// ── AUTO-REGISTRO QR ─────────────────────────────────────
+const params = new URLSearchParams(window.location.search);
+if (params.get('autoregistro') === '1') {
+  document.getElementById('autoReg').style.display = 'block';
+  document.getElementById('tab0').querySelector('.card').style.display = 'none';
+  document.getElementById('ar-hora').value = horaActual();
+  setInterval(() => { document.getElementById('ar-hora').value = horaActual(); }, 30000);
+}
+
+let accionAR = '';
+function selectAction(a) {
+  accionAR = a;
+  ['entrada','sal-comer','reg-comer','salida'].forEach(x => {
+    document.getElementById('ab-'+x).classList.toggle('selected', x===a);
+  });
+}
+
+function autoGuardar() {
+  const nombre = document.getElementById('ar-nombre').value.trim();
+  const num = document.getElementById('ar-num').value.trim();
+  const puesto = document.getElementById('ar-puesto').value;
+  const hora = document.getElementById('ar-hora').value;
+  const obs = document.getElementById('ar-obs').value.trim();
+
+  if (!nombre || !puesto || !accionAR) {
+    showToast('⚠ Completa nombre, puesto y tipo de registro'); return;
+  }
+
+  // Buscar registro existente del empleado en el turno
+  let existing = registros.find(r => r.nombre.toLowerCase() === nombre.toLowerCase() && r.fecha === hoyISO());
+  if (existing) {
+    if (accionAR === 'entrada' && !existing.entrada) existing.entrada = hora;
+    else if (accionAR === 'sal-comer' && !existing.salComer) existing.salComer = hora;
+    else if (accionAR === 'reg-comer' && !existing.regComer) existing.regComer = hora;
+    else if (accionAR === 'salida' && !existing.salida) existing.salida = hora;
+    if (obs) existing.obs = (existing.obs ? existing.obs + ' | ' : '') + obs;
+  } else {
+    const nuevo = {
+      id: Date.now(), fecha: hoyISO(), nombre, numEmpleado: num,
+      puesto, entrada: '', salComer: '', regComer: '', salida: '', obs
+    };
+    if (accionAR === 'entrada') nuevo.entrada = hora;
+    else if (accionAR === 'sal-comer') nuevo.salComer = hora;
+    else if (accionAR === 'reg-comer') nuevo.regComer = hora;
+    else if (accionAR === 'salida') nuevo.salida = hora;
+    registros.push(nuevo);
+  }
+  guardarLocal();
+  renderTabla();
+  renderStats();
+  showToast('✓ Registro guardado');
+  document.getElementById('ar-nombre').value = '';
+  document.getElementById('ar-num').value = '';
+  document.getElementById('ar-puesto').value = '';
+  document.getElementById('ar-obs').value = '';
+  accionAR = '';
+  ['entrada','sal-comer','reg-comer','salida'].forEach(x => document.getElementById('ab-'+x).classList.remove('selected'));
+}
+
+// ── GUARDAR REGISTRO MANUAL ──────────────────────────────
+function guardarRegistro() {
+  const nombre = document.getElementById('r-nombre').value.trim();
+  const puesto = document.getElementById('r-puesto').value;
+  if (!nombre || !puesto) { showToast('⚠ Nombre y puesto son requeridos'); return; }
+
+  const reg = {
+    id: Date.now(),
+    fecha: document.getElementById('r-fecha').value || hoyISO(),
+    nombre,
+    numEmpleado: document.getElementById('r-numempleado').value.trim(),
+    puesto,
+    entrada: document.getElementById('r-entrada').value,
+    salComer: document.getElementById('r-sal-comer').value,
+    regComer: document.getElementById('r-reg-comer').value,
+    salida: document.getElementById('r-salida').value,
+    obs: document.getElementById('r-obs').value.trim()
+  };
+  registros.push(reg);
+  guardarLocal();
+  renderTabla();
+  renderStats();
+  limpiarForm();
+  showToast('✓ Registro guardado');
+  showTab(1);
+}
+
+function limpiarForm() {
+  ['r-nombre','r-numempleado','r-entrada','r-sal-comer','r-reg-comer','r-salida','r-obs'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('r-puesto').value = '';
+  document.getElementById('r-fecha').value = hoyISO();
+}
+
+// ── CALCULOS ─────────────────────────────────────────────
+function calcHorasTrabajadas(r) {
+  const total = minsDiff(r.entrada, r.salida);
+  const comida = minsDiff(r.salComer, r.regComer);
+  if (total === null) return null;
+  return total - (comida || 0);
+}
+
+function calcTiempoComida(r) { return minsDiff(r.salComer, r.regComer); }
+
+function estadoRegistro(r) {
+  const hrs = calcHorasTrabajadas(r);
+  const comida = calcTiempoComida(r);
+  const issues = [];
+  if (!r.entrada) issues.push('Sin entrada');
+  if (!r.salida) issues.push('Sin salida');
+  if (comida !== null && comida > 60) issues.push('Comida >1h');
+  if (comida !== null && comida < 20) issues.push('Comida <20m');
+  if (hrs !== null && hrs < 420) issues.push('Jornada corta');
+  if (issues.length === 0) return { label: 'Completo', cls: 'badge-ok' };
+  if (!r.entrada || !r.salida) return { label: 'Incompleto', cls: 'badge-warn' };
+  return { label: issues[0], cls: 'badge-bad' };
+}
+
+// ── RENDER TABLA ─────────────────────────────────────────
+function renderTabla() {
+  const tbody = document.getElementById('tabla-registros');
+  const empty = document.getElementById('empty-state');
+  document.getElementById('total-reg').textContent = registros.length + ' registros';
+
+  if (registros.length === 0) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  tbody.innerHTML = registros.map((r, i) => {
+    const hrs = calcHorasTrabajadas(r);
+    const com = calcTiempoComida(r);
+    const est = estadoRegistro(r);
+    return `<tr>
+      <td>${i+1}</td>
+      <td><strong>${r.nombre}</strong></td>
+      <td>${r.numEmpleado || '—'}</td>
+      <td>${r.puesto}</td>
+      <td>${r.entrada || '—'}</td>
+      <td>${r.salComer || '—'}</td>
+      <td>${r.regComer || '—'}</td>
+      <td>${r.salida || '—'}</td>
+      <td><strong>${fmtMins(hrs)}</strong></td>
+      <td>${fmtMins(com)}</td>
+      <td><span class="badge ${est.cls}">${est.label}</span></td>
+      <td style="max-width:120px;font-size:11px;color:var(--gray-600)">${r.obs || ''}</td>
+      <td><button class="btn btn-danger btn-small" onclick="eliminar(${r.id})">✕</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function eliminar(id) {
+  if (!confirm('¿Eliminar este registro?')) return;
+  registros = registros.filter(r => r.id !== id);
+  guardarLocal();
+  renderTabla();
+  renderStats();
+  showToast('Registro eliminado');
+}
+
+// ── STATS ─────────────────────────────────────────────────
+function renderStats() {
+  const bar = document.getElementById('stats-bar');
+  const total = registros.length;
+  const completos = registros.filter(r => r.entrada && r.salida).length;
+  const incompletos = total - completos;
+  const hrsList = registros.map(r => calcHorasTrabajadas(r)).filter(h => h !== null);
+  const promHrs = hrsList.length ? Math.round(hrsList.reduce((a,b) => a+b, 0) / hrsList.length) : null;
+
+  bar.innerHTML = [
+    { num: total, lbl: 'Empleados' },
+    { num: completos, lbl: 'Completos' },
+    { num: incompletos, lbl: 'Incompletos' },
+    { num: promHrs !== null ? fmtMins(promHrs) : '—', lbl: 'Prom. Jornada' }
+  ].map(s => `<div class="stat-card"><div class="num">${s.num}</div><div class="lbl">${s.lbl}</div></div>`).join('');
+}
+
+// ── REPORTE Y RECOMENDACIONES ─────────────────────────────
+function renderReporte() {
+  const cont = document.getElementById('reporte-content');
+  if (registros.length === 0) {
+    cont.innerHTML = '<div class="empty-state"><div class="icon">📊</div><div>Agrega registros para ver el análisis.</div></div>';
+    return;
+  }
+
+  const fecha = document.getElementById('fecha-global').value;
+  const turno = document.getElementById('turno-global').value;
+  const auxiliar = document.getElementById('auxiliar-global').value || '—';
+
+  // Análisis
+  const total = registros.length;
+  const conEntrada = registros.filter(r => r.entrada);
+  const conSalida = registros.filter(r => r.salida);
+  const completos = registros.filter(r => r.entrada && r.salida);
+
+  const hrsList = completos.map(r => calcHorasTrabajadas(r)).filter(h => h !== null);
+  const promHrs = hrsList.length ? Math.round(hrsList.reduce((a,b)=>a+b,0)/hrsList.length) : null;
+  const maxHrs = hrsList.length ? Math.max(...hrsList) : null;
+  const minHrs = hrsList.length ? Math.min(...hrsList) : null;
+
+  const comidaList = registros.map(r => calcTiempoComida(r)).filter(h => h !== null);
+  const promComida = comidaList.length ? Math.round(comidaList.reduce((a,b)=>a+b,0)/comidaList.length) : null;
+
+  // Incidencias
+  const sinEntrada = registros.filter(r => !r.entrada);
+  const sinSalida = registros.filter(r => !r.salida);
+  const comidaLarga = registros.filter(r => calcTiempoComida(r) !== null && calcTiempoComida(r) > 60);
+  const jornadaCorta = completos.filter(r => (calcHorasTrabajadas(r)||0) < 420);
+
+  // Recomendaciones
+  const recs = [];
+
+  if (sinEntrada.length > 0) {
+    recs.push({ icon: '⚠️', titulo: 'Registros de entrada faltantes', texto: `${sinEntrada.length} empleado(s) no tienen hora de entrada registrada: ${sinEntrada.map(r=>r.nombre).join(', ')}. Verificar si fue omisión o ausencia.` });
+  }
+  if (sinSalida.length > 0) {
+    recs.push({ icon: '⚠️', titulo: 'Registros de salida pendientes', texto: `${sinSalida.length} empleado(s) sin hora de salida: ${sinSalida.map(r=>r.nombre).join(', ')}. Completar antes de cerrar el turno.` });
+  }
+  if (comidaLarga.length > 0) {
+    recs.push({ icon: '🍽️', titulo: 'Tiempo de comida excesivo', texto: `${comidaLarga.length} empleado(s) tomaron más de 60 min de comida: ${comidaLarga.map(r=>r.nombre).join(', ')}. El tiempo estándar es de 30-45 minutos.` });
+  }
+  if (jornadaCorta.length > 0) {
+    recs.push({ icon: '⏰', titulo: 'Jornada inferior a 7 horas', texto: `${jornadaCorta.length} empleado(s) trabajaron menos de 7 horas: ${jornadaCorta.map(r => r.nombre + ' (' + fmtMins(calcHorasTrabajadas(r)) + ')').join(', ')}. Verificar si hay justificación.` });
+  }
+  if (promHrs !== null && promHrs > 540) {
+    recs.push({ icon: '💪', titulo: 'Jornadas prolongadas', texto: `El promedio de jornada del turno es ${fmtMins(promHrs)}, superior a 9 horas. Considerar ajustar cargas de trabajo o reforzar con personal adicional.` });
+  }
+  if (promComida !== null && promComida < 25) {
+    recs.push({ icon: '⚡', titulo: 'Tiempos de comida muy cortos', texto: `El promedio de descanso para comer es de ${fmtMins(promComida)}, por debajo de lo recomendado. Puede afectar el rendimiento en la segunda parte del turno.` });
+  }
+  if (completos.length === total && total > 0) {
+    recs.push({ icon: '✅', titulo: 'Turno con registros completos', texto: `Todos los ${total} empleados tienen entrada y salida registradas. Excelente control del turno.` });
+  }
+  if (recs.length === 0 && total > 0) {
+    recs.push({ icon: '✅', titulo: 'Sin incidencias detectadas', texto: 'Los registros del turno están dentro de los parámetros normales.' });
+  }
+
+  // Ranking por puesto
+  const porPuesto = {};
+  registros.forEach(r => { if (!porPuesto[r.puesto]) porPuesto[r.puesto] = 0; porPuesto[r.puesto]++; });
+
+  cont.innerHTML = `
+    <div class="card">
+      <div class="card-title">📊 Resumen del Turno</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:1rem;">
+        ${[
+          { n: total, l: 'Total empleados' },
+          { n: completos.length, l: 'Registros completos' },
+          { n: sinEntrada.length + sinSalida.length, l: 'Incidencias' },
+          { n: promHrs !== null ? fmtMins(promHrs) : '—', l: 'Prom. jornada' },
+          { n: promComida !== null ? fmtMins(promComida) : '—', l: 'Prom. comida' }
+        ].map(s => `<div class="stat-card"><div class="num" style="font-size:22px">${s.n}</div><div class="lbl">${s.l}</div></div>`).join('')}
+      </div>
+      <p style="font-size:12px;color:var(--gray-600)">Fecha: <strong>${fecha}</strong> · Turno: <strong>${turno}</strong> · Auxiliar: <strong>${auxiliar}</strong></p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🏢 Personal por Puesto</div>
+      ${Object.entries(porPuesto).map(([p,c]) => `
+        <div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--gray-200);">
+          <span style="flex:1;font-size:13px;font-weight:500">${p}</span>
+          <div style="width:${Math.round((c/total)*160)}px;height:8px;background:var(--red);border-radius:4px;"></div>
+          <span style="font-size:13px;font-weight:700;color:var(--red);min-width:24px;text-align:right">${c}</span>
+        </div>`).join('')}
+    </div>
+
+    <div class="card">
+      <div class="card-title">💡 Recomendaciones del Sistema</div>
+      ${recs.map(r => `
+        <div class="rec-item">
+          <div class="rec-icon">${r.icon}</div>
+          <div class="rec-text"><strong>${r.titulo}</strong>${r.texto}</div>
+        </div>`).join('')}
+    </div>
+
+    <div class="card">
+      <div class="card-title">👥 Detalle por Empleado</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Nombre</th><th>Puesto</th>
+            <th>Entrada</th><th>Salida</th>
+            <th>Hrs. Trabajadas</th><th>T. Comida</th><th>Estado</th>
+          </tr></thead>
+          <tbody>
+            ${registros.map(r => {
+              const hrs = calcHorasTrabajadas(r);
+              const com = calcTiempoComida(r);
+              const est = estadoRegistro(r);
+              return `<tr>
+                <td><strong>${r.nombre}</strong></td>
+                <td>${r.puesto}</td>
+                <td>${r.entrada || '—'}</td>
+                <td>${r.salida || '—'}</td>
+                <td><strong>${fmtMins(hrs)}</strong></td>
+                <td>${fmtMins(com)}</td>
+                <td><span class="badge ${est.cls}">${est.label}</span></td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+// ── QR ───────────────────────────────────────────────────
+function generarQR() {
+  const box = document.getElementById('qrcode');
+  const url = window.location.origin + window.location.pathname + '?autoregistro=1';
+  document.getElementById('qr-url-label').textContent = url;
+  box.innerHTML = '';
+  new QRCode(box, { text: url, width: 200, height: 200, correctLevel: QRCode.CorrectLevel.M });
+}
+
+function descargarQR() {
+  const img = document.querySelector('#qrcode img') || document.querySelector('#qrcode canvas');
+  if (!img) { showToast('Genera el QR primero'); return; }
+  const a = document.createElement('a');
+  if (img.tagName === 'CANVAS') a.href = img.toDataURL();
+  else a.href = img.src;
+  a.download = 'QR_CEDIS_Coecillo.png';
+  a.click();
+}
+
+function copiarURL() {
+  const url = window.location.origin + window.location.pathname + '?autoregistro=1';
+  navigator.clipboard.writeText(url).then(() => showToast('✓ URL copiada'));
+}
+
+// ── PERSISTENCIA ─────────────────────────────────────────
+function guardarLocal() {
+  localStorage.setItem('tiempos_cedis', JSON.stringify({
+    registros,
+    fecha: document.getElementById('fecha-global').value,
+    turno: document.getElementById('turno-global').value,
+    auxiliar: document.getElementById('auxiliar-global').value
+  }));
+}
+
+function cargarLocal() {
+  try {
+    const d = JSON.parse(localStorage.getItem('tiempos_cedis') || 'null');
+    if (!d) return;
+    registros = d.registros || [];
+    if (d.fecha) document.getElementById('fecha-global').value = d.fecha;
+    if (d.turno) document.getElementById('turno-global').value = d.turno;
+    if (d.auxiliar) document.getElementById('auxiliar-global').value = d.auxiliar;
+  } catch(e) {}
+}
+
+function limpiarTurno() {
+  if (!confirm('¿Limpiar todos los registros del turno actual?')) return;
+  registros = [];
+  guardarLocal();
+  renderTabla();
+  renderStats();
   showToast('Turno limpiado');
 }
 
-function generatePDF() {
+// Auto-guardar al cambiar turno/fecha/auxiliar
+['fecha-global','turno-global','auxiliar-global'].forEach(id => {
+  document.getElementById(id).addEventListener('change', guardarLocal);
+});
+
+// ── PDF ──────────────────────────────────────────────────
+function generarPDF() {
+  if (registros.length === 0) { showToast('⚠ Sin registros para exportar'); return; }
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'letter' });
+  const pw = doc.internal.pageSize.getWidth();
+  const ph = doc.internal.pageSize.getHeight();
+  const RED = [227,0,27], BLACK = [26,26,26], GRAY = [245,245,243], LGRAY = [220,220,218];
 
   const fecha = document.getElementById('fecha-global').value || '—';
   const turno = document.getElementById('turno-global').value;
   const auxiliar = document.getElementById('auxiliar-global').value || '—';
 
-  const RED = [227, 0, 27];
-  const BLACK = [26, 26, 26];
-  const GRAY = [245, 245, 243];
+  // ── Página 1: Control de tiempos ──
+  doc.setFillColor(...BLACK); doc.rect(0,0,pw,14,'F');
+  doc.setFillColor(...RED); doc.rect(0,0,30,14,'F');
+  doc.setTextColor(255,255,255); doc.setFontSize(7); doc.setFont('helvetica','bold');
+  doc.text('COCA-COLA\nFEMSA', 15, 5.5, {align:'center'});
+  doc.setFontSize(11);
+  doc.text('CONTROL DIARIO DE TIEMPOS OPERATIVOS', pw/2, 9, {align:'center'});
+  doc.setFontSize(8); doc.text('TURNO: '+turno.toUpperCase(), pw-8, 9, {align:'right'});
 
-  const titles = [
-    'Métricas para Maniobras Generales',
-    'Métricas para Montacargas',
-    'Métricas – Personal de Limpieza',
-    'Distribución de Personal',
-    'Control Diario de Tiempos Operativos'
+  doc.setTextColor(...BLACK); doc.setFont('helvetica','normal'); doc.setFontSize(8);
+  doc.text(`Fecha: ${fecha}`, 8, 20);
+  doc.text(`Auxiliar: ${auxiliar}`, 80, 20);
+  doc.text(`Total empleados: ${registros.length}`, 180, 20);
+
+  doc.autoTable({
+    head: [['#','Nombre','No. Emp.','Puesto','H. Entrada','Sal. Comer','Reg. Comer','H. Salida','Hrs. Trabajadas','T. Comida','Estado','Observaciones']],
+    body: registros.map((r,i) => {
+      const hrs = calcHorasTrabajadas(r);
+      const com = calcTiempoComida(r);
+      const est = estadoRegistro(r);
+      return [i+1, r.nombre, r.numEmpleado||'—', r.puesto,
+        r.entrada||'—', r.salComer||'—', r.regComer||'—', r.salida||'—',
+        fmtMins(hrs), fmtMins(com), est.label, r.obs||''];
+    }),
+    startY: 25,
+    styles: { fontSize: 7.5, cellPadding: 2 },
+    headStyles: { fillColor: BLACK, textColor: [255,255,255], fontStyle:'bold', fontSize:7 },
+    alternateRowStyles: { fillColor: GRAY },
+    columnStyles: { 1: {fontStyle:'bold'}, 8: {fontStyle:'bold'} },
+    margin: { left:6, right:6 }
+  });
+
+  // Firma
+  doc.setDrawColor(...BLACK);
+  doc.line(8, ph-12, pw/2-5, ph-12);
+  doc.line(pw/2+5, ph-12, pw-8, ph-12);
+  doc.setFontSize(7); doc.setTextColor(...BLACK);
+  doc.text('Firma del Auxiliar', pw/4, ph-8, {align:'center'});
+  doc.text('Visto Bueno Coordinador', (3*pw)/4, ph-8, {align:'center'});
+
+  // ── Página 2: Reporte y Recomendaciones ──
+  doc.addPage('letter','landscape');
+
+  doc.setFillColor(...BLACK); doc.rect(0,0,pw,14,'F');
+  doc.setFillColor(...RED); doc.rect(0,0,30,14,'F');
+  doc.setTextColor(255,255,255); doc.setFontSize(7); doc.setFont('helvetica','bold');
+  doc.text('COCA-COLA\nFEMSA', 15, 5.5, {align:'center'});
+  doc.setFontSize(11);
+  doc.text('REPORTE DE ANÁLISIS – TIEMPOS OPERATIVOS', pw/2, 9, {align:'center'});
+  doc.setFontSize(8); doc.text('TURNO: '+turno.toUpperCase(), pw-8, 9, {align:'right'});
+
+  let y = 22;
+  doc.setTextColor(...BLACK); doc.setFont('helvetica','normal'); doc.setFontSize(8);
+  doc.text(`Fecha: ${fecha}  |  Turno: ${turno}  |  Auxiliar: ${auxiliar}  |  Total: ${registros.length} empleados`, 8, y);
+  y += 8;
+
+  // Estadísticas
+  const completos = registros.filter(r => r.entrada && r.salida);
+  const hrsList = completos.map(r => calcHorasTrabajadas(r)).filter(h=>h!==null);
+  const promHrs = hrsList.length ? Math.round(hrsList.reduce((a,b)=>a+b,0)/hrsList.length) : null;
+  const comidaList = registros.map(r=>calcTiempoComida(r)).filter(h=>h!==null);
+  const promComida = comidaList.length ? Math.round(comidaList.reduce((a,b)=>a+b,0)/comidaList.length) : null;
+  const sinEntrada = registros.filter(r=>!r.entrada);
+  const sinSalida = registros.filter(r=>!r.salida);
+  const comidaLarga = registros.filter(r=>(calcTiempoComida(r)||0)>60);
+  const jornadaCorta = completos.filter(r=>(calcHorasTrabajadas(r)||0)<420);
+
+  doc.setFillColor(...GRAY); doc.rect(6, y, pw-12, 22, 'F');
+  doc.setFont('helvetica','bold'); doc.setFontSize(8);
+  doc.setTextColor(...RED);
+  doc.text('INDICADORES DEL TURNO', 10, y+6);
+  doc.setTextColor(...BLACK); doc.setFont('helvetica','normal'); doc.setFontSize(7.5);
+  const kpis = [
+    `Total empleados: ${registros.length}`,
+    `Completos: ${completos.length}`,
+    `Sin entrada: ${sinEntrada.length}`,
+    `Sin salida: ${sinSalida.length}`,
+    `Prom. jornada: ${fmtMins(promHrs)}`,
+    `Prom. comida: ${fmtMins(promComida)}`,
+    `Jornadas cortas: ${jornadaCorta.length}`,
+    `Comidas largas: ${comidaLarga.length}`
   ];
+  kpis.forEach((k,i) => doc.text(k, 10 + (i%4)*65, y + 12 + Math.floor(i/4)*7));
+  y += 28;
 
-  let firstPage = true;
+  // Recomendaciones
+  const recs = [];
+  if (sinEntrada.length>0) recs.push({ t:'REGISTROS DE ENTRADA FALTANTES', d:`${sinEntrada.length} empleado(s) sin entrada: ${sinEntrada.map(r=>r.nombre).join(', ')}. Verificar si fue omisión o ausencia no justificada.` });
+  if (sinSalida.length>0) recs.push({ t:'REGISTROS DE SALIDA PENDIENTES', d:`${sinSalida.length} empleado(s) sin salida: ${sinSalida.map(r=>r.nombre).join(', ')}. Completar o justificar antes de cerrar el turno.` });
+  if (comidaLarga.length>0) recs.push({ t:'TIEMPO DE COMIDA EXCESIVO', d:`${comidaLarga.length} empleado(s) tomaron >60 min de comida: ${comidaLarga.map(r=>r.nombre+' ('+fmtMins(calcTiempoComida(r))+')').join(', ')}. Revisar causas y aplicar política de tiempos.` });
+  if (jornadaCorta.length>0) recs.push({ t:'JORNADAS INFERIORES A 7 HORAS', d:`${jornadaCorta.length} empleado(s) con jornada corta: ${jornadaCorta.map(r=>r.nombre+' ('+fmtMins(calcHorasTrabajadas(r))+')').join(', ')}. Solicitar justificante o nota de coordinador.` });
+  if (promHrs!==null && promHrs>540) recs.push({ t:'JORNADAS PROLONGADAS', d:`Promedio de ${fmtMins(promHrs)} por encima de 9 hrs. Evaluar distribución de cargas o necesidad de personal adicional para el siguiente turno.` });
+  if (promComida!==null && promComida<25) recs.push({ t:'DESCANSOS DE COMIDA MUY CORTOS', d:`Promedio de ${fmtMins(promComida)} de comida. Se recomienda mínimo 30 min para mantener rendimiento en la segunda parte del turno.` });
+  if (completos.length===registros.length && registros.length>0) recs.push({ t:'TURNO CON CONTROL COMPLETO', d:'Todos los empleados tienen entrada y salida registradas. Excelente disciplina operativa del turno.' });
+  if (recs.length===0) recs.push({ t:'SIN INCIDENCIAS', d:'Los registros del turno están dentro de los parámetros normales de operación.' });
 
-  for (let i = 0; i < 5; i++) {
-    const { headers, rows } = getTableData(i);
-    if (rows.length === 0) continue;
+  doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(...RED);
+  doc.text('RECOMENDACIONES Y HALLAZGOS', 8, y); y += 6;
+  doc.setDrawColor(...RED); doc.line(8, y, pw-8, y); y += 5;
 
-    if (!firstPage) doc.addPage('letter', 'landscape');
-    firstPage = false;
+  recs.forEach((rec, idx) => {
+    if (y > ph - 20) { doc.addPage('letter','landscape'); y = 20; }
+    doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(...BLACK);
+    doc.text(`${idx+1}. ${rec.t}`, 10, y); y += 5;
+    doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(90,90,90);
+    const lines = doc.splitTextToSize(rec.d, pw-24);
+    lines.forEach(l => { doc.text(l, 14, y); y += 4.5; });
+    y += 3;
+  });
 
-    const pw = doc.internal.pageSize.getWidth();
-
-    // Header bar
-    doc.setFillColor(...BLACK);
-    doc.rect(0, 0, pw, 14, 'F');
-    doc.setFillColor(...RED);
-    doc.rect(0, 0, 28, 14, 'F');
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(7);
-    doc.setFont('helvetica', 'bold');
-    doc.text('COCA-COLA\nFEMSA', 14, 5.5, { align: 'center' });
-    doc.setFontSize(11);
-    doc.text(titles[i].toUpperCase(), pw / 2, 9, { align: 'center' });
-    doc.setFontSize(8);
-    doc.text('TURNO: ' + turno.toUpperCase(), pw - 8, 9, { align: 'right' });
-
-    // Meta info
-    doc.setTextColor(...BLACK);
-    doc.setFontSize(8);
-    doc.setFont('helvetica', 'normal');
-    doc.text('Fecha: ' + fecha, 8, 20);
-    doc.text('Auxiliar: ' + auxiliar, 8, 25);
-
-    // Table
-    doc.autoTable({
-      head: [headers],
-      body: rows,
-      startY: 29,
-      styles: { fontSize: 8, cellPadding: 2.5, lineColor: [220, 220, 218], lineWidth: 0.1 },
-      headStyles: { fillColor: BLACK, textColor: [255,255,255], fontStyle: 'bold', fontSize: 7.5 },
-      alternateRowStyles: { fillColor: GRAY },
-      tableWidth: 'auto',
-      margin: { left: 8, right: 8 }
-    });
-
-    const obs = document.getElementById('obs' + i).value;
-    if (obs) {
-      const y = doc.lastAutoTable.finalY + 5;
-      doc.setFontSize(7.5);
-      doc.setFont('helvetica', 'bold');
-      doc.setTextColor(...BLACK);
-      doc.text('Observaciones:', 8, y);
-      doc.setFont('helvetica', 'normal');
-      doc.text(obs, 8, y + 4, { maxWidth: pw - 16 });
-    }
-
-    // Footer
-    const py = doc.internal.pageSize.getHeight();
-    doc.setDrawColor(...BLACK);
-    doc.line(8, py - 12, pw / 2 - 5, py - 12);
-    doc.line(pw / 2 + 5, py - 12, pw - 8, py - 12);
-    doc.setFontSize(7);
-    doc.setTextColor(...BLACK);
-    doc.text('Firma del Auxiliar', pw / 4, py - 8, { align: 'center' });
-    doc.text('Visto Bueno Coordinador', (3 * pw) / 4, py - 8, { align: 'center' });
-  }
-
-  if (firstPage) { showToast('⚠ No hay datos para exportar'); return; }
-
-  const fname = 'Metricas_' + turno + '_' + fecha.replace(/-/g, '') + '.pdf';
+  const fname = `Tiempos_${turno}_${fecha.replace(/-/g,'')}.pdf`;
   doc.save(fname);
   showToast('✓ PDF generado: ' + fname);
 }
 
-// Init rows
-for (let i = 0; i < 5; i++) addRow(i);
-
-// Load saved draft
-try {
-  const saved = JSON.parse(localStorage.getItem('metricas_cedis') || 'null');
-  if (saved) {
-    if (saved.fecha) document.getElementById('fecha-global').value = saved.fecha;
-    if (saved.turno) document.getElementById('turno-global').value = saved.turno;
-    if (saved.auxiliar) document.getElementById('auxiliar-global').value = saved.auxiliar;
-    for (let i = 0; i < 5; i++) {
-      if (saved['obs' + i]) document.getElementById('obs' + i).value = saved['obs' + i];
-    }
-  }
-} catch(e) {}
-
-updateCounts();
-updateRankings();
+// ── CSV ──────────────────────────────────────────────────
+function exportarCSV() {
+  if (registros.length===0) { showToast('⚠ Sin datos'); return; }
+  const cols = ['Fecha','Nombre','No. Empleado','Puesto','H. Entrada','Sal. Comer','Reg. Comer','H. Salida','Hrs. Trabajadas','T. Comida','Estado','Observaciones'];
+  const rows = registros.map(r => [
+    r.fecha, r.nombre, r.numEmpleado||'', r.puesto,
+    r.entrada||'', r.salComer||'', r.regComer||'', r.salida||'',
+    fmtMins(calcHorasTrabajadas(r)), fmtMins(calcTiempoComida(r)),
+    estadoRegistro(r).label, r.obs||''
+  ]);
+  const csv = [cols, ...rows].map(r => r.map(c => `"${c}"`).join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent('\uFEFF' + csv);
+  a.download = `Tiempos_${document.getElementById('turno-global').value}_${document.getElementById('fecha-global').value}.csv`;
+  a.click();
+  showToast('✓ CSV descargado');
+}
 </script>
 </body>
 </html>
